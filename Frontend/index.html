@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Summarizer</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Cargue y resumen de documentos</a>
+    </nav>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Cargar un documento</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="file">Carga un documento en formato txt</label>
+                                <input type="file" class="form-control-file" id="file" name="file" required>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block">Cargar y resumir</button>
+                        </form>
+                        <div class="mt-3" id="loading" style="display: none;">
+                            <div class="alert alert-info" role="alert">
+                                Cargando resumen, por favor espera...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3" id="summary-result" style="display: none;">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0">Summary</h4>
+                        </div>
+                        <div class="card-body">
+                            <p id="summary-text"></p>
+                            <a id="download-link" href="#" class="btn btn-primary">Download Summary</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            document.getElementById('loading').style.display = 'block';
+            var formData = new FormData(this);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+              .then(data => {
+                  document.getElementById('loading').style.display = 'none';
+                  document.getElementById('summary-text').textContent = data.summary;
+                  document.getElementById('summary-result').style.display = 'block';
+                  document.getElementById('download-link').href = '/download/' + data.summary_file;
+              }).catch(error => {
+                  console.error('Error:', error);
+                  document.getElementById('loading').style.display = 'none';
+              });
+        });
+    </script>
+</body>
+</html>
